@@ -1,9 +1,10 @@
-'''1.Create a separate branch to work with
-   2.Do not change any variables and structure of this code
-   3.Do not commit to main branch without complete checking
-   4.Use valid names for the variables and functions
-   5.Give code comments for all the functions,classes and all complex part of the code
-   6.Make sure you dont modify others part without consulting.'''
+'''1.Create a separate branch to work with.
+   2.Do not change any variables and structure of this code.
+   3.Do not commit to main branch without complete checking.
+   4.Use valid names for the variables and functions.
+   5.Give code comments for all the functions,classes and all complex part of the code.
+   6.Make sure you dont modify others part without consulting.
+   7.Changes to the main function can be done as you like.'''
 
 import heapq #library to use priority queue for shortest path algorithm
 
