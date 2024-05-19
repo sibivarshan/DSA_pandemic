@@ -28,9 +28,9 @@ class cityNode:
 
 
 class edgeDist:
-    def __init__(self, sourceState, destinationState, distance, direction):
-        self.source = sourceState
-        self.destination = destinationState
+    def __init__(self, source, destination, distance, direction):
+        self.source = source
+        self.destination = destination
         self.distance = distance
         self.direction = direction
 
@@ -198,6 +198,46 @@ class CityGraph:
         self.cityVertices.append(temp_city)
         stateGraph.addCitiesToStates(temp_city)
 
+    def getcity(self, name):
+        for city in self.cityVertices:
+            if city.cityName == name:
+                return city
+        
+        print("City not found!!")
+        return None
+
+    def evacuatecity(self, name):
+        curr = self.getcity(name)
+        
+        population = curr.population
+        neighbours = curr.neighbourCity
+        neighbours = sorted(neighbours, key=lambda node: node.distance)
+        
+        for i in neighbours:
+            new=self.getcity(i.destination.cityName)
+            if population <= 0:
+                break
+            
+            available_capacity = new.capacity - new.population
+            
+            if available_capacity > 0:
+                if population <= available_capacity:
+                    new.population += population
+                    population = 0
+                else:
+                    new.population += available_capacity
+                    population -= available_capacity
+        
+        # Optionally, print the updated populations
+        print(f"After evacuation, the population of {name} is now 0.")
+        curr.population = 0  # Set the evacuated city's population to 0
+        for i in neighbours:
+            new=self.getcity(i.destination.cityName)
+            print(f"{new.cityName} now has a population of {new.population}.")
+
+
+
+
     def connectCities(self, city1, city2, distance):
         tempCity1 = next((city for city in self.cityVertices if city.cityName == city1), None)
         tempCity2 = next((city for city in self.cityVertices if city.cityName == city2), None)
@@ -219,17 +259,17 @@ def main():
     state_graph.addNeighbourState("StateA", "StateB", 100, "north")
 
     # Adding cities
-    city_graph.addCity("StateA", "CityA1", 100, 50, state_graph)
-    city_graph.addCity("StateA", "CityA2", 200000, 2000, state_graph)
-    city_graph.addCity("StateB", "CityB1", 500000, 3000, state_graph)
-    city_graph.addCity("StateA", "CityA3", 150000, 1000, state_graph)  # Adding a medical city
+    city_graph.addCity("StateA", "CityA1", 4000, 50, state_graph)
+    city_graph.addCity("StateA", "CityA2", 2000, 200, state_graph)
+    city_graph.addCity("StateB", "CityB1", 5000, 300, state_graph)
+    city_graph.addCity("StateA", "CityA3", 1500, 100, state_graph)  # Adding a medical city
     city_graph.cityVertices[0].medCity = True  # Setting CityA3 as a medical city
     city_graph.cityVertices[2].medCity = True
     # Connecting cities
     city_graph.connectCities("CityA1", "CityA2", 50)
     city_graph.connectCities("CityA1", "CityB1", 120)
     city_graph.connectCities("CityA1", "CityA3", 70)  # Connecting to the medical city
-    city_graph.connectCities("CityA2", "CityA3", 10)
+    city_graph.connectCities("CityA2", "CityA3", 60)
 
     # Reordering cities based on infection rate
     state_graph.reOrderCities()
@@ -239,6 +279,7 @@ def main():
     state_graph.serviceCityInState("StateB")
     state_graph.getmaxstate()
     state_graph.generatereport("StateA")
+    city_graph.evacuatecity("CityA2")
 
 
 if __name__ == "__main__":
