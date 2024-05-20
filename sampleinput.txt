@@ -1,0 +1,29 @@
+30
+nearest_medical_city CityA1
+infection_rate StateA
+find_bridges
+find_articulation_points
+service_city StateA
+get_max_state
+generate_report StateA
+evacuate_city CityA2
+supply_state 5000 StateA
+reach_all_cities StateA
+visualisation
+nearest_medical_city CityB1
+infection_rate StateB
+service_city StateB
+generate_report StateB
+evacuate_city CityB3
+supply_state 3000 StateB
+reach_all_cities StateB
+nearest_medical_city CityC1
+infection_rate StateC
+find_bridges
+find_articulation_points
+service_city StateC
+generate_report StateC
+evacuate_city CityC2
+supply_state 6000 StateC
+reach_all_cities StateC
+visualisation
