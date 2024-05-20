@@ -176,7 +176,8 @@ class StateGraph:
         
         print(tabulate(state_data, headers=["Attribute", "Value"], tablefmt="grid"))
 
-#
+#this prints the the state which has the maximum affected density by calculating it
+# O(n) - To iterate through all the states
     def getmaxstate(self):
         max=self.stateVertices[0]
         for i in self.stateVertices:
@@ -329,6 +330,12 @@ class CityGraph:
         
         print("City not found!!")
         return None
+
+'''This evacuates the city provided by moving the population in the city to first nearby city upto their 
+capacity and if it gets filles then moves to the next nearest city
+For sorting - O(nlogn)
+For iterating - O(n)
+'''
 
     def evacuatecity(self, name):
         curr = self.getcity(name)
