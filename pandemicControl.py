@@ -219,15 +219,18 @@ class StateGraph:
     
 
     def reachAllCities(self, state_name):
+       #This function reachAllCities is a method of a class. It takes one parameter, state_name, which specifies the name of the state whose cities we want to connect using a Minimum Spanning Tree (MST).
         state = next((s for s in self.stateVertices if s.StateName == state_name), None)
-        if not state:
+        #This line searches through self.stateVertices to find the state object that matches the state_name parameter. If no match is found, state will be None.
+#If the state is not found, the function returns an empty list, indicating that no MST can be constructed.
+       if not state:
             return []
-
+#This selects the first city from the state's medCityList to use as the starting node for the algorithm.
         start_node = state.medCityList[0]
         graph = defaultdict(dict)
-
+#This creates a dictionary state_cities where the keys are city names and the values are city objects, but only for cities within the specified state.
         state_cities = {city.cityName: city for city in state.cityList}
-
+#It checks if the neighbor city is within the state_cities dictionary to ensure only intra-state connections are included.
         for city in state.cityList:
             for neighbor in city.neighbourCity:
                 if neighbor.destination.cityName in state_cities:
@@ -241,7 +244,12 @@ class StateGraph:
         for neighbor in start_node.neighbourCity:
             if neighbor.destination.cityName in state_cities:
                 heapq.heappush(pq, (neighbor.distance, start_node.cityName, neighbor.destination.cityName))
+#This loop pushes the edges of the start_node into the priority queue pq with the distance as the priority. This ensures that we start with the smallest edge from the starting node.
 
+
+#This loop runs until all cities in state_cities have been visited.
+#This nested loop extracts the minimum weight edge from the priority queue. If the destination city (dest) is not already visited, the loop breaks, and the edge is processed.
+#The else part of the loop ensures that if the priority queue becomes empty and no valid edge is found, the outer loop breaks.
         while len(visited) < len(state_cities):
             while pq:
                 weight, source, dest = heapq.heappop(pq)
@@ -252,7 +260,7 @@ class StateGraph:
 
             mst.append((source, dest, weight))
             visited.add(dest)
-
+#This loop pushes the edges of the newly visited city (dest) into the priority queue, ensuring that only edges to unvisited cities are considered.
             for neighbor in state_cities[dest].neighbourCity:
                 if neighbor.destination.cityName not in visited and neighbor.destination.cityName in state_cities:
                     heapq.heappush(pq, (neighbor.distance, dest, neighbor.destination.cityName))
