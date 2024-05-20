@@ -223,7 +223,7 @@ class StateGraph:
         state = next((s for s in self.stateVertices if s.StateName == state_name), None)
         #This line searches through self.stateVertices to find the state object that matches the state_name parameter. If no match is found, state will be None.
 #If the state is not found, the function returns an empty list, indicating that no MST can be constructed.
-       if not state:
+        if not state:
             return []
 #This selects the first city from the state's medCityList to use as the starting node for the algorithm.
         start_node = state.medCityList[0]
@@ -339,11 +339,11 @@ class CityGraph:
         print("City not found!!")
         return None
 
-'''This evacuates the city provided by moving the population in the city to first nearby city upto their 
-capacity and if it gets filles then moves to the next nearest city
-For sorting - O(nlogn)
-For iterating - O(n)
-'''
+#This evacuates the city provided by moving the population in the city to first nearby city upto their 
+#capacity and if it gets filles then moves to the next nearest city
+#For sorting - O(nlogn)
+#For iterating - O(n)
+
 
     def evacuatecity(self, name):
         curr = self.getcity(name)
