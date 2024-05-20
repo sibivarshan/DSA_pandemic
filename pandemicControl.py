@@ -156,7 +156,8 @@ class StateGraph:
             return (state.infected_no / state.population) * 100
         return None 
     
-
+#this function generates a report for a given state name by showing all its details in terminal in tabular format
+#tabulate module is used - O(n){To find the required state}
     def generatereport(self,statename):
         curr=None
         for i in self.stateVertices:
@@ -174,7 +175,8 @@ class StateGraph:
         ]
         
         print(tabulate(state_data, headers=["Attribute", "Value"], tablefmt="grid"))
-    
+
+#
     def getmaxstate(self):
         max=self.stateVertices[0]
         for i in self.stateVertices:
