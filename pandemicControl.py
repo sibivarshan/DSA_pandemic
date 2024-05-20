@@ -499,24 +499,29 @@ def visualisation(state_graph):
     num_cols = math.ceil(math.sqrt(num_states))
     num_rows = math.ceil(num_states / num_cols)
 
+    # Number of rows and columns for the subplot grid
     fig, axes = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(16, 8))
     fig.suptitle("Individual State Graphs", fontsize=16)
 
+    # Iterate through each state graph and plot
     for i, (state_name, state_graph) in enumerate(state_graphs.items()):
-        row = i // num_cols
-        col = i % num_cols
-        ax = axes[row, col]
+        row = i // num_cols  # Calculate the row index for the subplot
+        col = i % num_cols   # Calculate the column index for the subplot
+        ax = axes[row, col]  # Get the subplot axis
 
+       # Position nodes using the spring layout algorithm
         pos = nx.spring_layout(state_graph)
+       # Draw the state graph
         nx.draw(state_graph, pos, with_labels=True, node_size=500, node_color="lightblue", font_size=8, font_weight="bold", ax=ax)
-        edge_labels = nx.get_edge_attributes(state_graph, 'distance')
+        edge_labels = nx.get_edge_attributes(state_graph, 'distance') # Get edge labels for distances
         nx.draw_networkx_edge_labels(state_graph, pos, edge_labels=edge_labels, ax=ax)
-        ax.set_title(state_name)
+        ax.set_title(state_name)  # Set the title of the subplot
 
     # Remove empty subplots if needed
     for i in range(num_states, num_rows * num_cols):
         fig.delaxes(axes.flatten()[i])  
 
+    # Adjust subplots to fit into the figure area
     plt.tight_layout()
     plt.subplots_adjust(top=0.85)
 
@@ -548,7 +553,7 @@ def visualisation(state_graph):
     plt.title("Combined City Graph")
     plt.tight_layout()
 
-    plt.show()
+    plt.show() # Show all plots
 
 
 def main():
