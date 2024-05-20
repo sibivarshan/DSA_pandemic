@@ -1,10 +1,4 @@
-'''1.Create a separate branch to work with.
-   2.Do not change any variables and structure of this code.
-   3.Do not commit to main branch without complete checking.
-   4.Use valid names for the variables and functions.
-   5.Give code comments for all the functions,classes and all complex part of the code.
-   6.Make sure you dont modify others part without consulting.
-   7.Changes to the main function can be done as you like. '''
+
    
 import math
 import networkx as nx
@@ -12,7 +6,7 @@ import matplotlib.pyplot as plt
 import heapq
 from tabulate import tabulate
 from collections import defaultdict
-
+import random
 
 
 
@@ -44,6 +38,9 @@ class cityNode: #class city node is a class for the details of the city vertex
         self.medCity = med #only if its a medical city,this will be true
         self.neighbourCity = [] # edge list for city vertex
         self.supplies = 0
+
+    def __lt__(self, other):
+        return self.distance < other.distance
 
 class edgeDist: 
 #class to create edges in graphs of states and cities, it has source,destination and weight of the edge #direction can be ignored for now
@@ -190,29 +187,29 @@ class StateGraph:
     used dijkstra's shortest path algorithm.'''
     
     def moveToCityShortestPath(self, city, stateVer):
-        for ver in stateVer.cityList1: #initialize the distances
-            ver.distance = float('inf') #infinity
+        for ver in stateVer.cityList1:  # initialize the distances
+            ver.distance = float('inf')  # infinity
             ver.parentCity = None
         city.distance = 0
-        priority_queue = [] #using priority queue
-        heapq.heappush(priority_queue, (city.distance, city)) # passing that queue as parameter for the heapq library, with city distance as key and city as value
+        priority_queue = []  # using priority queue
+        heapq.heappush(priority_queue, (city.distance, city))  # pushing city with its distance
 
         while priority_queue:
-            current_distance, current_city = heapq.heappop(priority_queue) #similar to BFS, we do
+            current_distance, current_city = heapq.heappop(priority_queue)  # extract the city with the smallest distance
 
             if current_city.medCity:
                 print(f"Reached medical city: {current_city.cityName} with total distance {current_distance}")
-                return current_distance # if a med city is reached, come out of the code
+                return current_distance  # if a med city is reached, exit the function
 
             for edge in current_city.neighbourCity:
                 neighbor_city = edge.destination
                 distance = edge.distance
                 new_distance = current_distance + distance 
 
-                if new_distance < neighbor_city.distance: # relaxation part, if v.d > u.d + w(u,v) then we change the ditance
+                if new_distance < neighbor_city.distance:  # relaxation part
                     neighbor_city.distance = new_distance
                     neighbor_city.parentCity = current_city
-                    heapq.heappush(priority_queue, (new_distance, neighbor_city)) #change in queue since we may visit that vertex again 
+                    heapq.heappush(priority_queue, (new_distance, neighbor_city))  # push the updated distance and city
 
         print("No medical city reachable")
         return float('inf')
@@ -226,7 +223,6 @@ class StateGraph:
         start_node = state.medCityList[0]
         graph = defaultdict(dict)
 
-        # Select only the cities within the specified state
         state_cities = {city.cityName: city for city in state.cityList}
 
         for city in state.cityList:
@@ -236,23 +232,30 @@ class StateGraph:
 
         mst = []
         visited = set([start_node.cityName])
+        pq = []
+
+    # Push the edges of the start node into the priority queue
+        for neighbor in start_node.neighbourCity:
+            if neighbor.destination.cityName in state_cities:
+                heapq.heappush(pq, (neighbor.distance, start_node.cityName, neighbor.destination.cityName))
 
         while len(visited) < len(state_cities):
-            min_edge = None
-            min_weight = float('inf')
-            for source_city in visited:
-                for dest_city, weight in graph[source_city].items():
-                    if dest_city not in visited and weight < min_weight:
-                        min_edge = (source_city, dest_city)
-                        min_weight = weight
+            while pq:
+                weight, source, dest = heapq.heappop(pq)
+                if dest not in visited:
+                 break
+            else:
+                break
 
-            if min_edge:
-                source, dest = min_edge
-                mst.append((source, dest, graph[source][dest]))
-                visited.add(dest)
-        for city in state.cityList1:
-            print(city.cityName)
-        return  mst
+            mst.append((source, dest, weight))
+            visited.add(dest)
+
+            for neighbor in state_cities[dest].neighbourCity:
+                if neighbor.destination.cityName not in visited and neighbor.destination.cityName in state_cities:
+                    heapq.heappush(pq, (neighbor.distance, dest, neighbor.destination.cityName))
+
+
+        return mst
 
 
 #this class is an ADT implementation of heap library, this is not used currently, changes are to be made
@@ -553,6 +556,7 @@ def main():
     city_graph = CityGraph()
 
     # Adding states
+    # Adding states
     state_graph.addNewState("StateA", 5000000, 10000) #(statename,populatoin,infected)
     state_graph.addNewState("StateB", 3000000, 5000)
     state_graph.addNewState("StateC", 4000000, 7000)
@@ -567,48 +571,128 @@ def main():
     state_graph.addNeighbourState("StateD", "StateE", 300, "northwest")
     
     # Adding cities
-    city_graph.addCity("StateA", "CityA1", 100, 50, state_graph,True) #add cities to respective graph and state
-    city_graph.addCity("StateA", "CityA2", 200000, 2000, state_graph,True)
-    city_graph.addCity("StateA", "CityA3", 150000, 1000, state_graph,True)  # Adding a medical city
+    city_graph.addCity("StateA", "CityA1", 100, 50, state_graph, True)  # Medical city
+    city_graph.addCity("StateA", "CityA2", 200000, 2000, state_graph, True)
+    city_graph.addCity("StateA", "CityA3", 150000, 1000, state_graph, True)
     city_graph.addCity("StateA", "CityA4", 100000, 500, state_graph)
-    city_graph.addCity("StateA", "CityA5", 250000, 2500, state_graph,True)
-
+    city_graph.addCity("StateA", "CityA5", 250000, 2500, state_graph, True)
+    city_graph.addCity("StateA", "CityA6", 180000, 1500, state_graph)
+    city_graph.addCity("StateA", "CityA7", 220000, 2000, state_graph)
+    city_graph.addCity("StateA", "CityA8", 130000, 1000, state_graph)
+    city_graph.addCity("StateA", "CityA9", 300000, 3500, state_graph, True)
     city_graph.addCity("StateB", "CityB1", 500000, 3000, state_graph)
     city_graph.addCity("StateB", "CityB2", 150000, 1500, state_graph)
     city_graph.addCity("StateB", "CityB3", 250000, 2000, state_graph)
+    city_graph.addCity("StateB", "CityB4", 200000, 1800, state_graph)
+    city_graph.addCity("StateB", "CityB5", 280000, 2200, state_graph)
+    city_graph.addCity("StateB", "CityB6", 350000, 2500, state_graph, True)
+    city_graph.addCity("StateB", "CityB7", 240000, 1800, state_graph)
+    city_graph.addCity("StateB", "CityB8", 180000, 1500, state_graph, True)
+    city_graph.addCity("StateB", "CityB9", 210000, 2000, state_graph)
 
-    city_graph.addCity("StateC", "CityC1", 300000, 3500, state_graph,True)
+    city_graph.addCity("StateC", "CityC1", 300000, 3500, state_graph, True)
     city_graph.addCity("StateC", "CityC2", 400000, 4000, state_graph)
-    city_graph.addCity("StateC", "CityC3", 200000, 2500, state_graph,True)
+    city_graph.addCity("StateC", "CityC3", 200000, 2500, state_graph, True)
+    city_graph.addCity("StateC", "CityC4", 250000, 3000, state_graph)
+    city_graph.addCity("StateC", "CityC5", 180000, 2000, state_graph)
+    city_graph.addCity("StateC", "CityC6", 220000, 2300, state_graph, True)
+    city_graph.addCity("StateC", "CityC7", 190000, 1800, state_graph)
+    city_graph.addCity("StateC", "CityC8", 270000, 2800, state_graph, True)
+    city_graph.addCity("StateC", "CityC9", 230000, 2100, state_graph)
 
     city_graph.addCity("StateD", "CityD1", 350000, 3500, state_graph)
     city_graph.addCity("StateD", "CityD2", 450000, 4500, state_graph)
-    city_graph.addCity("StateD", "CityD3", 250000, 3000, state_graph,True)
+    city_graph.addCity("StateD", "CityD3", 250000, 3000, state_graph, True)
+    city_graph.addCity("StateD", "CityD4", 280000, 3200, state_graph)
+    city_graph.addCity("StateD", "CityD5", 210000, 2500, state_graph, True)
+    city_graph.addCity("StateD", "CityD6", 320000, 3800, state_graph)
+    city_graph.addCity("StateD", "CityD7", 200000, 1800, state_graph, True)
+    city_graph.addCity("StateD", "CityD8", 190000, 2000, state_graph)
+    city_graph.addCity("StateD", "CityD9", 240000, 2300, state_graph)
 
-    city_graph.addCity("StateE", "CityE1", 500000, 5000, state_graph,True)
+    city_graph.addCity("StateE", "CityE1", 500000, 5000, state_graph, True)
     city_graph.addCity("StateE", "CityE2", 600000, 6000, state_graph)
-    city_graph.addCity("StateE", "CityE3", 400000, 4500, state_graph) 
+    city_graph.addCity("StateE", "CityE3", 400000, 4500, state_graph)
+    city_graph.addCity("StateE", "CityE4", 450000, 4800, state_graph)
+    city_graph.addCity("StateE", "CityE5", 380000, 3800, state_graph)
+    city_graph.addCity("StateE", "CityE6", 430000, 4200, state_graph)
+    city_graph.addCity("StateE", "CityE7", 470000, 4900, state_graph, True)
+    city_graph.addCity("StateE", "CityE8", 390000, 4000, state_graph)
+    city_graph.addCity("StateE", "CityE9", 420000, 4300, state_graph, True) 
 
 
     # Connecting cities
-    city_graph.connectCities("CityA1", "CityA2", 50)#connect cities in same state accordingly, connection to different state is also possible
-    city_graph.connectCities("CityA1", "CityB1", 120)
-    city_graph.connectCities("CityA1", "CityA3", 70)  # Connecting to the medical city
-    city_graph.connectCities("CityA2", "CityA3", 10)
-    city_graph.connectCities("CityA3", "CityA4", 20)
-    city_graph.connectCities("CityA4", "CityA5", 30)
+    city_graph.connectCities("CityA1", "CityA3", 50)
+    city_graph.connectCities("CityA1", "CityA2", 120)
+    city_graph.connectCities("CityA1", "CityA5", 70)  # Connecting to the medical city
+    city_graph.connectCities("CityA5", "CityA3", 10)
+    city_graph.connectCities("CityA7", "CityA5", 20)
+    city_graph.connectCities("CityA7", "CityA3", 30)
+    city_graph.connectCities("CityA3", "CityA4", 40)
+    city_graph.connectCities("CityA4", "CityA9", 50)
+    city_graph.connectCities("CityA9", "CityA6", 60)
+    city_graph.connectCities("CityA4", "CityA6", 70)
+    city_graph.connectCities("CityA8", "CityA5", 80)
+    city_graph.connectCities("CityA6", "CityA8", 90)
 
-    city_graph.connectCities("CityB1", "CityB2", 40)
-    city_graph.connectCities("CityB2", "CityB3", 50)
+    city_graph.connectCities("CityB1", "CityB3", 50)
+    city_graph.connectCities("CityB1", "CityB2", 120)
+    city_graph.connectCities("CityB1", "CityB5", 70)  # Connecting to the medical city
+    city_graph.connectCities("CityB5", "CityB3", 10)
+    city_graph.connectCities("CityB7", "CityB5", 20)
+    city_graph.connectCities("CityB7", "CityB3", 30)
+    city_graph.connectCities("CityB3", "CityB4", 40)
+    city_graph.connectCities("CityB4", "CityB9", 50)
+    city_graph.connectCities("CityB9", "CityB6", 60)
+    city_graph.connectCities("CityB4", "CityB6", 70)
+    city_graph.connectCities("CityB8", "CityB5", 80)
+    city_graph.connectCities("CityB6", "CityB8", 90)
 
-    city_graph.connectCities("CityC1", "CityC2", 60)
-    city_graph.connectCities("CityC2", "CityC3", 70)
 
-    city_graph.connectCities("CityD1", "CityD2", 80)
-    city_graph.connectCities("CityD2", "CityD3", 90)
+    city_graph.connectCities("CityC1", "CityC3", 50)
+    city_graph.connectCities("CityC1", "CityC2", 120)
+    city_graph.connectCities("CityC1", "CityC5", 70)  # Connecting to the medical city
+    city_graph.connectCities("CityC5", "CityC3", 10)
+    city_graph.connectCities("CityC7", "CityC5", 20)
+    city_graph.connectCities("CityC7", "CityC3", 30)
+    city_graph.connectCities("CityC3", "CityC4", 40)
+    city_graph.connectCities("CityC4", "CityC9", 50)
+    city_graph.connectCities("CityC9", "CityC6", 60)
+    city_graph.connectCities("CityC4", "CityC6", 70)
+    city_graph.connectCities("CityC8", "CityC5", 80)
+    city_graph.connectCities("CityC6", "CityC8", 90)
 
-    city_graph.connectCities("CityE1", "CityE2", 100)
-    city_graph.connectCities("CityE2", "CityE3", 110)
+
+    city_graph.connectCities("CityD1", "CityD3", 50)
+    city_graph.connectCities("CityD1", "CityD2", 120)
+    city_graph.connectCities("CityD1", "CityD5", 70)  # Connecting to the medical city
+    city_graph.connectCities("CityD5", "CityD3", 10)
+    city_graph.connectCities("CityD7", "CityD5", 20)
+    city_graph.connectCities("CityD7", "CityD3", 30)
+    city_graph.connectCities("CityD3", "CityD4", 40)
+    city_graph.connectCities("CityD4", "CityD9", 50)
+    city_graph.connectCities("CityD9", "CityD6", 60)
+    city_graph.connectCities("CityD4", "CityD6", 70)
+    city_graph.connectCities("CityD8", "CityD5", 80)
+    city_graph.connectCities("CityD6", "CityD8", 90)
+
+    city_graph.connectCities("CityE1", "CityE3", 50)
+    city_graph.connectCities("CityE1", "CityE2", 120)
+    city_graph.connectCities("CityE1", "CityE5", 70)  # Connecting to the medical city
+    city_graph.connectCities("CityE5", "CityE3", 10)
+    city_graph.connectCities("CityE7", "CityE5", 20)
+    city_graph.connectCities("CityE7", "CityE3", 30)
+    city_graph.connectCities("CityE3", "CityE4", 40)
+    city_graph.connectCities("CityE4", "CityE9", 50)
+    city_graph.connectCities("CityE9", "CityE6", 60)
+    city_graph.connectCities("CityE4", "CityE6", 70)
+    city_graph.connectCities("CityE8", "CityE5", 80)
+    city_graph.connectCities("CityE6", "CityE8", 90)
+
+    city_graph.connectCities("CityA6", "CityB8", 90)
+    city_graph.connectCities("CityB6", "CityC8", 90)
+    city_graph.connectCities("CityC6", "CityD8", 90)
+    city_graph.connectCities("CityD6", "CityE8", 90)
 
     # Reordering cities based on infection rate
     state_graph.reOrderCities() #call this funcition fo build th heap according to the infected in all states
@@ -621,7 +705,6 @@ def main():
     state_graph.serviceCityInState("StateE")
     
     state_graph.reOrderCities()  # call this function to build the heap according to the infected in all states
-
     # Processing commands
     inputs = int(input("Enter the number of commands: "))
     while inputs > 0:
