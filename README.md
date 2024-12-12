@@ -1,2 +1,2 @@
-# DSA_pandemic
-dsa final project-2024
+-A simple and efficient system designed to make transportation of medical goods during pandemic situations.
+-Various graph and tree algorithms are used
